@@ -15,42 +15,45 @@ import { gql } from 'apollo-boost';
 // First, pass your GraphQL query wrapped in the gql function into the useQuery hook. When your component renders and the useQuery hook runs, a result object will be returned containing loading, error, and data properties. Apollo Client tracks error and loading state for you, which will be reflected in the loading and error properties. Once the result of your query comes back, it will be attached to the data property
 import { useQuery } from '@apollo/react-hooks';
 
-const client = new ApolloClient({
+const cryptoClient = new ApolloClient({
   uri: 'https://48p1r2roz4.sse.codesandbox.io',
 });
 
-// Creating an ExchangeRates component to see the useQuery() hook in action
-const EXCHANGE_RATES = gql `
+const dogsClient = new ApolloClient({
+  uri: 'https://32ypr38l61.sse.codesandbox.io/',
+})
+
+const GET_DOGS = gql `
   {
-    rates(currency: "USD") {
-      currency
-      rate
+    dogs {
+      id
+      breed
     }
   }
-`
+`;
 
-function ExchangeRates() {
-  const { loading, error, data } = useQuery(EXCHANGE_RATES);
+function Dogs({onDogSelected}) {
+  const { loading, error, data } = useQuery(GET_DOGS);
 
-  if(loading) return <p>Loading...</p>;
-  if(error) return <p>Error </p>;
+  if(loading) return 'Loading...';
+  if(error) return `Error! ${error.message}`;
 
-  console.log(data);
-
-  return data.rates.map(({currency, rate}) => (
-    <div key={currency}>
-      <p>
-        {currency}: {rate}
-      </p>
-    </div>
-  ));
+  return (
+    <select name='dog' onChange={onDogSelected}>
+      {data.dogs.map(dog => (
+        <option key={dog.id} value={dog.breed}>
+          {dog.breed}
+        </option>
+      ))}
+    </select>
+  );
 }
 
 function App() {
   return (
-    <ApolloProvider client={client}>
+    <ApolloProvider client={dogsClient}>
       <div className="App">
-        <ExchangeRates />
+        <Dogs />
       </div>
     </ApolloProvider>
   );
